@@ -1,6 +1,6 @@
 <?php
 
-//REGISTER
+
 class user{
     private $id ;
     public $login ;
@@ -9,40 +9,36 @@ class user{
     public $firstname ;
     public $lastname ;
 
+public function register($login, $password, $email, $firstname, $lastname){
+    
 
-public function __construct($login, $password, $email, $firstname, $lastname){
-    $this->login = $login;
-    $this->password = $password;
-    $this->email = $email;
-    $this->firstname = $firstname;
-    $this->lastname = $lastname;
+    $bdd = mysqli_connect("localhost", "root", "", "classes");
+    $insertquery="SELECT * FROM utilisateurs WHERE login = '".$login."';";
+    $query = mysqli_query($bdd, $insertquery); 
+    $row =  mysqli_num_rows($query);
+
+    if($row == 0) {
+        $insertquery= "INSERT INTO utilisateurs (login, password, email, firstname, lastname) VALUES('" .$login. "', '" .$password. "', '" .$email. "', '" .$firstname. "', '" .$lastname. "');";
+        $query =  mysqli_query($bdd, $insertquery); 
+        return [$login, $password, $email, $firstname, $lastname];
+    }
+
 } 
 
-public function register($login, $password, $email, $firstname, $lastname){
-    $bdd = mysqli_connect("localhost", "root", "", "classes");
-    $requete=" INSERT INTO utilisateurs (login, password, email, firstname, lastname)
-    VALUES(' " .$login. "', '" .$password. "', '" .$email. "', '" .$firstname. "', '" .$lastname. "');";
-    $result = mysqli_query($bdd, $requete); 
-    return $result;
-}
 
 
-//CONNECT
 
 
 public function connect($login, $password){
-    session_start();
+   
     $bdd = mysqli_connect("localhost", "root", "", "classes");
-    $requete="SELECT login, password FROM `utilisateurs` WHERE `login` = '$login' and `password`= '$password'";
-    $result = mysqli_query($bdd, $requete);
-    $userexist =  mysqli_fetch_row($result);
+    $requete="SELECT * FROM utilisateurs WHERE login = '".$login."' AND password= '".$password."'";
+    $query = mysqli_query($bdd, $requete);
+    $row =  mysqli_num_rows($query);
 
-
-          
-            if($userexist>=1)
-            {
+        if($row){
             
-              $user = mysqli_fetch_assoc($result);
+              $user = mysqli_fetch_assoc($query);
 
               $this->id = $user['id'];
               $this->login = $user['login'];
@@ -50,63 +46,61 @@ public function connect($login, $password){
               $this->email = $user['email'];
               $this->firstname = $user['firstname'];
               $this->lastname = $user['lastname'];
-              return 'ok';
+              return true;
             }
             
             else
             {   
-                  return 'ERREUR';
+                  return false;
             }
     }
 
 
 
-/*
-//DISCONNECT
+
 
 public function disconnect(){
   
-    session_destroy();
-    
+    if (isset($this->id)) { 
+
+        $this->id = NULL;
+        $this->login = NULL;
+        $this->password = NULL;
+        $this->email = NULL;
+        $this->firstname = NULL;
+        $this->lastname = NULL; 
+
+    }
+
     return true;
+
 }
 
 
-//DELETE
 
 public function delete(){
 
     $bdd = mysqli_connect("localhost", "root", "", "classes");
     $requete="DELETE FROM `utilisateurs` WHERE `id` = '".$this->id."';";
-    $result = mysqli_query($bdd, $requete);
+    $query = mysqli_query($bdd, $requete);
 
-    $this->id = NULL;
-    $this->login = NULL;
-    $this->password = NULL;
-    $this->email = NULL;
-    $this->firstname = NULL;
-    $this->lastname = NULL;
-
-    session_destroy();
-    return $result;
+    return $query;
 }
-*/
 
-//UPDATE
+
 
 public function update($login, $password, $email, $firstname, $lastname){
 
     $bdd = mysqli_connect("localhost", "root", "", "classes");    
     $requete = "UPDATE utilisateurs SET login = '".$login."', password = '".$password."', email = '".$email."', firstname = '".$firstname."', lastname = '".$lastname."' WHERE id ='".$this->id."' ";
-    $result = mysqli_query($bdd, $requete);
+    $query = mysqli_query($bdd, $requete);
 
-    return $result;
+    return $query;
 
 }
 
 
 
-//IS CONNECTED
 public function isConnected(){
 if (isset($this->id)){
     return 1;
@@ -118,14 +112,11 @@ else{
 }
 
 
-//GETALLINFOS
-
 public function getAllInfos(){
     return $this;
 }
 
 
-//GETLOGIN
 
 public function getLogin(){
     return $this->login;
@@ -133,7 +124,6 @@ public function getLogin(){
 
 
 
-//GET EMAIL
 
 public function getEmail(){
     return $this->email;
@@ -142,16 +132,12 @@ public function getEmail(){
 
 
 
-//GETFIRSTNAME
-
 public function getFirstname(){
     return $this->firstname;
 }
 
 
 
-
-//GETLASTNAME
 
 public function getLastname(){
     return $this->lastname;
@@ -160,15 +146,15 @@ public function getLastname(){
 
 
 
-//REFRESH
-
 
 public function refresh(){
     $bdd = mysqli_connect("localhost", "root", "", "classes");
-    $requete="SELECT * FROM `utilisateurs` WHERE `id` = '".$this->id."' ";
+    $requete="SELECT * FROM utilisateurs WHERE id = '".$this->id."' ";
     $result = mysqli_query($bdd, $requete);
 
-    $user = mysqli_fetch_assoc($result);
+    if(isset($this->id)){
+        
+        $user = mysqli_fetch_assoc($result);
 
         $this->id = $user['id'];
         $this->login = $user['login'];
@@ -176,21 +162,51 @@ public function refresh(){
         $this->email = $user['email'];
         $this->firstname = $user['firstname'];
         $this->lastname = $user['lastname'];
-return $result;
+        return true;
+    }
          
-
-
 }
 
 }
 
-$mimi = new user('mimi', 'mimi', 'mimi@gmail.com', 'mimi', 'mimi');
-$mimi->register('mimi', 'mimi', 'mimi@gmail.com', 'mimi', 'mimi');
-var_dump($mimi->connect('mimi', 'mimi'));
+$rico = new user('rico', 'rico', 'rico@gmail.com', 'rico', 'rico');
+$rico->register('rico', 'rico', 'rico@gmail.com', 'rico', 'rico');
+echo '<pre>';
 
-$mimi->update('mimi', 'mimi', 'mimi3@gmail.com', 'mimi', 'Mimi');
-var_dump($mimi->update('mimi', 'mimi', 'mimi3@gmail.com', 'mimi', 'Mimi'));
+var_dump($rico->connect('rico', 'rico'));
+echo '<pre>';
 
-var_dump($mimi->refresh());
+
+//var_dump($cece->disconnect());
+//var_dump($cece->delete());
+
+var_dump($rico->isConnected());
+echo '<pre>';
+
+var_dump($rico->getAllInfos());
+echo '<pre>';
+
+var_dump($rico->getLogin());
+echo '<pre>';
+
+var_dump($rico->getEmail());
+echo '<pre>';
+
+var_dump($rico->getFirstname());
+echo '<pre>';
+
+var_dump($rico->getLastname());
+echo '<pre>';
+
+var_dump($rico->update('rico', 'rico', 'rico6@gmail.com', 'rico', 'rico'));
+echo '<pre>';
+
+var_dump($rico->refresh());
+echo '<pre>';
+
+var_dump($rico);
+echo '<pre>';
+
 
 ?>
+
