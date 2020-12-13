@@ -6,11 +6,6 @@ class Ipdo
     private $username;
     private $password;
     private $connection;
-    private $query;
-    private $userinfo;
-    private $table;
-    private $req;
-    private $result;
   
 
  public function constructeur($host = "localhost", $username = "root", $password = "", $db = "discussion"){
@@ -20,84 +15,88 @@ class Ipdo
         $this->username = $username;
         $this->password = $password;
         $this->db= $db;
-        $this->query;
-        $this->userinfo;
-        $this->table;
-        $this->req;
-        $this->result;
-        $this->connection = new mysqli($host, $username, $password, $db);
-
+        $connection = mysqli_connect($this->host, $this->username, $this->password, $this->db);
+        $this->connection = $connection;
         return $this->connection;
     }
 
 
-public function connect($host, $username, $password, $dbname){
+function connect($host, $username, $password, $db){
         if(isset ($this->connection))
         {
-            $this->__destruct();
+            $this->destructeur();
         }
-          return $this->connection;
+        return $this->connection;
     }
 
-public function close(){
-       $this->connection->close();
-       return true;
+function close(){
+    if(isset($this->connection)){
+        mysqli_close($this->connection);
+    }
     }
 
-public function __destruct()
+function destructeur()
     {
-        $this->db = null;
-        return true;
+        if(isset($this->connection)){
+            $this->db = null;
+            return true;
+        }
+       
     }
 
-public function execute($query){
-        $this->req = $this->connection->prepare($query);
-        $this->req->execute();
-        $this->result = $this->req->fetch();
-        return $this->result;
+function execute($query){
+    $req = mysqli_query($this->connection, $query);
+    $this->lastquery = $query;
+    $this->lastresult= mysqli_fetch_all($req, MYSQLI_ASSOC);
+    return [$this->lastresult]; 
     }
+   
   
 
-public function getLastQuery(){
-    if (isset($this->req)){
-    return $this->req;
+function getLastQuery(){
+    if(isset($this->lastquery)){
+        return $this->lastquery;
     }
-    else
-    {
-    return false;
-    }
-}
-     
-public function getLastresult(){
-    
-    if ($this->result){
-        return $this->result;
-        }
-        else
-        {
+    else{
         return false;
-        }
+    }
 }
+   
+function getLastresult(){
+    if(isset($this->lastresult)){
+        return $this->lastresult;
+    }
+    else{
+        return false;
+    }
+    }
 
-public function getTables(){
+
+
+
+function getTables(){
     
     $result = mysqli_query($this->connection, 'SHOW TABLES');
-    $this->table = $this->req->fetch();
+    $this->showtable = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    return $this->showtable;
+    }
+
+
+
+
+function getFields($table){
+    $result = mysqli_query($this->connection, 'SHOW COLUMN FIELDS');
+    $this->table = mysqli_fetch_all($result, MYSQLI_ASSOC);
     return  $this->table;
+    
 }
 
 
-
-public function getFields($table){
-    $result = $this->db->query('SELECT * FROM utilisateurs');
-    $this->table = $this->req->fetch();
-    return  $this->table;
 }
 
-}
 
 echo '<pre>';
-$mysqli = new Ipdo();
+$mysqli = new Ipdo("localhost", "root", "root", "discussion");
 echo '<pre>';
 
 echo '<pre>';
@@ -111,8 +110,8 @@ echo '<pre>';
 //var_dump($mysqli->close());
 //echo '<pre>';
 
-//var_dump($mysqli-> __destruct());
-//echo '<pre>';
+//var_dump($mysqli->destructeur());
+echo '<pre>';
 
 echo '<pre>';
 var_dump($mysqli->execute('SELECT * from utilisateurs'));
@@ -123,7 +122,7 @@ var_dump($mysqli->getLastQuery());
 echo '<pre>';
 
 echo '<pre>';
-var_dump($mysqli->getLastresult());
+var_dump($mysqli->getlastresult());
 echo '</pre>';
 
 echo '</pre>';
@@ -131,12 +130,14 @@ var_dump($mysqli->getTables());
 echo '<pre>';
 
 echo '<pre>';
-var_dump($mysqli->getFields('utilisateurs'));
+var_dump($mysqli->getFields('utilisateurs'));//NULL
 echo '<pre>';
 
 echo '<pre>';
 var_dump($mysqli);
 echo '<pre>';
+
+
 ?>
 
 
