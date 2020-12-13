@@ -146,6 +146,9 @@ public function refresh(){
     }               
     
 }
+
+
+
 $lila = new user('lila', 'lila', 'lila@gmail.com', 'lila', 'lila');
 $lila->register('lila', 'lila', 'lila@gmail.com', 'lila', 'lila');
 echo '<pre>';

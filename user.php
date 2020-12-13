@@ -169,6 +169,9 @@ public function refresh(){
 
 }
 
+
+
+
 $rico = new user('rico', 'rico', 'rico@gmail.com', 'rico', 'rico');
 $rico->register('rico', 'rico', 'rico@gmail.com', 'rico', 'rico');
 echo '<pre>';
